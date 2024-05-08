@@ -485,8 +485,9 @@ public class MinecraftResolverImpl implements MinecraftResolver, MinecraftResolv
         // there's nothing yet, it's our time to resolve
         return this.associatedArtifacts.computeIfAbsent(
             EnvironmentKey.of(side, version, decoratedArtifact),
-            key -> this.provide(side, version, modifiers).thenComposeAsync(
-                envResult -> {
+            key -> {
+                final CompletableFuture<ResolutionResult<MinecraftEnvironment>> provided = this.provide(side, version, modifiers);
+                final ResolutionResult<MinecraftEnvironment> envResult = provided.join();
                     if (!envResult.isPresent()) {
                         throw new IllegalStateException("No environment could be found for '" + side + "' version " + version);
                     }
@@ -533,9 +534,7 @@ public class MinecraftResolverImpl implements MinecraftResolver, MinecraftResolv
                     } else {
                         return CompletableFuture.completedFuture(ResolutionResult.result(output, true)); // todo: find some better way of checking validity? for ex. when decompiler version changes
                     }
-                },
-                this.executor()
-            )
+                }
         );
     }
 
