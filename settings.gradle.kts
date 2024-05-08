@@ -1,7 +1,12 @@
 pluginManagement {
     repositories {
-        maven("https://repo.spongepowered.org/repository/maven-public/") {
-            name = "sponge"
+        mavenCentral()
+        gradlePluginPortal()
+        maven("https://repo.papermc.io/repository/maven-public/") {
+            metadataSources {
+                mavenPom()
+                artifact()
+            }
         }
     }
 }

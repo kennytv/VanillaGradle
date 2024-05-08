@@ -43,6 +43,8 @@ import org.gradle.api.tasks.options.Option;
 import org.gradle.internal.component.external.model.ModuleComponentArtifactIdentifier;
 import org.gradle.jvm.toolchain.JavaLauncher;
 import org.gradle.workers.WorkerExecutor;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.spongepowered.gradle.vanilla.MinecraftExtension;
 import org.spongepowered.gradle.vanilla.internal.Constants;
 import org.spongepowered.gradle.vanilla.internal.MinecraftExtensionImpl;
@@ -69,6 +71,7 @@ import javax.inject.Inject;
 
 public abstract class DecompileJarTask extends DefaultTask {
 
+    private static final Logger LOGGER = LoggerFactory.getLogger(DecompileJarTask.class);
     private static final ReentrantLock DECOMPILE_LOCK = new ReentrantLock();
 
     public DecompileJarTask() {
@@ -147,7 +150,7 @@ public abstract class DecompileJarTask extends DefaultTask {
                 (env, output) -> {
                     final long totalSystemMemoryBytes =
                         ((OperatingSystemMXBean) ManagementFactory.getOperatingSystemMXBean()).getTotalMemorySize() / (1024L * 1024L);
-                    return CompletableFuture.runAsync(() -> {
+                    //return CompletableFuture.runAsync(() -> {
                         // Determine which parts of the configuration are MC, and which are its dependencies
                         final Set<File> dependencies = new HashSet<>();
                         for (final ResolvedArtifactResult artifact : this.getInputArtifacts().get()) {
@@ -184,12 +187,17 @@ public abstract class DecompileJarTask extends DefaultTask {
                             parameters.getOutputJar().set(output.toFile());
                         });
                         this.getWorkerExecutor().await();
-                    }, ((MinecraftResolver.Context) minecraftProvider.resolver()).syncExecutor());
+                    //}, ((MinecraftResolver.Context) minecraftProvider.resolver()).syncExecutor());
+                    return CompletableFuture.completedFuture(null);
                 }
             );
 
             try {
+                if (!resultFuture.isDone()) {
+                    LOGGER.error("Decompile task did not complete as expected");
+                }
                 final ResolutionResult<Path> result = minecraftProvider.resolver().processSyncTasksUntilComplete(resultFuture);
+                LOGGER.warn("Decompiled jar to {}", result.orElseNull());
                 this.setDidWork(!result.upToDate());
             } catch (final ExecutionException ex) {
                 throw new GradleException("Failed to decompile " + this.getMinecraftVersion().get(), ex.getCause());
