@@ -49,7 +49,7 @@ public final class Constants {
     public static final String MINECRAFT_RESOURCES_HOST = "resources.download.minecraft.net";
     public static final String TASK_GROUP = "vanilla gradle";
     public static final int ASM_VERSION = Opcodes.ASM9;
-    public static final Instant MIN_MC_VERSION_TIMESTAMP = Instant.from(DateTimeFormatter.ISO_DATE_TIME.parse("2025-12-16T12:42:29+00:00"));
+    public static final Instant MIN_MC_VERSION_TIMESTAMP = Instant.from(DateTimeFormatter.ISO_DATE_TIME.parse("2025-12-09T02:42:29+00:00"));
     public static final String MIN_MC_VERSION_NAME = "26.1-snapshot-1";
     public static final String INDENT = "    "; // indent to use when writing files
 
